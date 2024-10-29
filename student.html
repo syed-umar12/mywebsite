@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue.js Lessons App</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style> -->
+      /* Basic Reset */
+     {
+      margin: 1;
+      padding: 1;
+      box-sizing: border-box;
+    }
+ 
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #fdfdfd;
+      padding: 20px;
+    }
+ 
+    h1, h2, h3 {
+      color: #ee99d2;
+    }
+ 
+    /* App Container */
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #0ebd82;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+ 
+    /* Lesson List */
+    .lesson-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+ 
+    .lesson {
+      flex: 1 1 calc(33% - 40px);
+      background-color: #f3600b;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.2s;
+    }
+ 
+    .lesson:hover {
+      transform: translateY(-5px);
+    }
+ 
+    .lesson img {
+      max-width: 100px;
+      margin-bottom: 15px;
+    }
+ 
+    .lesson h2 {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+ 
+    .lesson p {
+      font-size: 1.1em;
+      margin-bottom: 10px;
+    }
+ 
+    .lesson button {
+      padding: 10px 15px;
+      border: none;
+      background-color: #f78989;
+      color: white;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+ 
+    .lesson button:disabled {
+      background-color: #052c12;
+      cursor: not-allowed;
+    }
+ 
+    .lesson button:hover:not(:disabled) {
+      background-color: #aed0f3;
+    }
+ 
+    /* Sort Options */
+    .sort-options {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+ 
+    .sort-options select, .sort-options button {
+      padding: 10px;
+      border: 1px solid #e68484;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+ 
+    /* Cart Button */
+    .cart-btn {
+      margin-top: 20px;
+      background-color: #c9eb0c;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1.1em;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-block;
+    }
+ 
+    .cart-btn:disabled {
+      background-color: #0ab5f8;
+    }
+ 
+    /* Shopping Cart */
+    .cart {
+      margin-top: 40px;
+    }
+ 
+    .cart .lesson {
+      flex: 1 1 calc(100%);
+      background-color: #525558;
+      border: 1px solid #f59a9a;
+      margin-bottom: 10px;
+    }
+ 
+    .cart h2 {
+      text-align: center;
+    }
+ 
+    /* Checkout Section */
+    .checkout {
+      margin-top: 20px;
+      background-color: #0b84fd;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+ 
+    .checkout input {
+      padding: 10px;
+      margin: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: calc(50% - 22px);
+    }
+ 
+    .checkout button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+ 
+    .checkout button:disabled {
+      background-color: #ccc;
+    }
+ 
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .lesson {
+        flex: 1 1 calc(50% - 40px);
+      }
+ 
+      .checkout input {
+        width: calc(100% - 22px);
+      }
+    }
+ 
+    @media (max-width: 480px) {
+      .lesson {
+        flex: 1 1 calc(100% - 40px);
+      }
+    }
+  </style>
+</head>
+<body>
+ 
+<div id="app">
+  <h1>Lesson Booking</h1>
+ 
+  <!-- Sort Options -->
+  <div class="sort-options">
+     <div class="Search">
+        <select v-model="Search">
+            <option value="subject"></option>
+            <option value="location"></option>
+            <option value="price"></option>
+            <option value="spaces"></option>
+        </select>
+    </div>
+    <div>
+      <label>Sort by: </label>
+      <select v-model="sortKey">
+        <option value="subject">Subject</option>
+        <option value="location">Location</option>
+        <option value="price">Price</option>
+        <option value="spaces">Spaces</option>
+      </select>
+    </div>
+ 
+    <div>
+      <label>Order: </label>
+      <button @click="toggleOrder">{{ sortOrder ? 'Ascending' : 'Descending' }}</button>
+    </div>
+  </div>
+ 
+  <!-- Lesson List -->
+  <div class="lesson-list">
+    <div v-for="lesson in sortedLessons" :key="lesson.id" class="lesson">
+      <img src="https://via.placeholder.com/100" alt="Lesson Icon">
+      <h2>{{ lesson.subject }}</h2>
+      <p><i class="fas fa-map-marker-alt"></i> {{ lesson.location }}</p>
+      <p>Price: ${{ lesson.price }}</p>
+      <p>Spaces: {{ lesson.spaces }}</p>
+      <button
+        :disabled="lesson.spaces === 0"
+        @click="addToCart(lesson)">
+        Add to Cart
+      </button>
+    </div>
+  </div>
+ 
+  <!-- Cart and Checkout -->
+  <button class="cart-btn" @click="toggleCart" :disabled="cart.length === 0">
+    Shopping Cart ({{ cart.length }})
+  </button>
+ 
+  <div v-if="showCart" class="cart">
+    <h2>Your Cart</h2>
+    <div v-for="item in cart" :key="item.id" class="lesson">
+      <h3>{{ item.subject }}</h3>
+      <p><i class="fas fa-map-marker-alt"></i> {{ item.location }}</p>
+      <button @click="removeFromCart(item)">Remove</button>
+    </div>
+ 
+    <!-- Checkout Form -->
+    <div class="checkout">
+      <h2>Checkout</h2>
+      <input type="text" v-model="name" placeholder="Your Name">
+      <input type="text" v-model="phone" placeholder="Phone Number">
+      <button @click="checkout" :disabled="!validCheckout">Checkout</button>
+    </div>
+  </div>
+</div>
+ 
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      lessons: [
+        { id: 1, subject: 'Math', location: 'Toronto', price: 50, spaces: 5 },
+        { id: 2, subject: 'Science', location: 'Chicago', price: 100, spaces: 3 },
+        { id: 3, subject: 'History', location: 'Zurich', price: 150, spaces: 2 },
+        { id: 4, subject: 'Art', location: 'Islamabad', price: 110, spaces: 1 },
+        { id: 5, subject: 'Music', location: 'Mumbai', price: 135, spaces: 0 },
+        { id: 6, subject: 'Physics', location: 'Kualalampur', price: 170, spaces: 4 },
+        { id: 7, subject: 'Chemistry', location: 'Bali', price: 200, spaces: 5 },
+        { id: 8, subject: 'Biology', location: 'Paris', price: 80, spaces: 2 },
+        { id: 9, subject: 'English', location: 'London', price: 60, spaces: 1 },
+        { id: 10, subject: 'Philosophy', location: 'Madrid', price: 55, spaces: 3 }
+      ],
+      cart: [],
+      sortKey: 'subject',
+      sortOrder: true,
+      showCart: false,
+      name: '',
+      phone: ''
+    },
+    computed: {
+      sortedLessons() {
+        return this.lessons.slice().sort((a, b) => {
+          let modifier = this.sortOrder ? 1 : -1;
+          if (a[this.sortKey] < b[this.sortKey]) return -1 * modifier;
+          if (a[this.sortKey] > b[this.sortKey]) return 1 * modifier;
+          return 0;
+        });
+      },
+      validCheckout() {
+        const nameValid = /^[a-zA-Z\s]+$/.test(this.name);
+        const phoneValid = /^[0-9]+$/.test(this.phone);
+        return nameValid && phoneValid;
+      }
+    },
+    methods: {
+      toggleOrder() {
+        this.sortOrder = !this.sortOrder;
+      },
+      addToCart(lesson) {
+        if (lesson.spaces > 0) {
+          lesson.spaces--;
+          this.cart.push(lesson);
+        }
+      },
+      removeFromCart(item) {
+        const index = this.cart.indexOf(item);
+        if (index > -1) {
+          this.cart.splice(index, 1);
+          const lesson = this.lessons.find(l => l.id === item.id);
+          lesson.spaces++;
+        }
+      },
+      toggleCart() {
+        this.showCart = !this.showCart;
+      },
+      checkout() {
+        if (this.validCheckout) {
+          alert('Order submitted successfully!');
+          this.cart = [];
+          this.showCart = false;
+          this.name = '';
+          this.phone = '';
+        }
+      }
+    }
+  });
+</script>
+ 
+</body>
+</html>
+ 
+ 
+ 
